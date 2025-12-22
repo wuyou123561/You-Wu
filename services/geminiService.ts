@@ -1,10 +1,11 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { AnalysisResult, LensStatus, VerdictLevel, SourceLink } from "../types";
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+import { AnalysisResult, SourceLink } from "../types";
 
 export const analyzeNews = async (content: string): Promise<AnalysisResult> => {
+  // Initialize AI right before the call to ensure it uses the current environment context
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: `Act as a professional disinformation analyst. Apply the 'Tri-Lens Protocol' to evaluate this news text: "${content}". 
@@ -66,9 +67,9 @@ export const analyzeNews = async (content: string): Promise<AnalysisResult> => {
     }
   });
 
-  const result = JSON.parse(response.text || '{}') as AnalysisResult;
+  const text = response.text || '{}';
+  const result = JSON.parse(text) as AnalysisResult;
   
-  // Extract grounding sources from Google Search metadata
   const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
   if (groundingChunks) {
     const sources: SourceLink[] = groundingChunks
@@ -79,7 +80,6 @@ export const analyzeNews = async (content: string): Promise<AnalysisResult> => {
         title: web.title
       }));
     
-    // Deduplicate sources by URI
     result.groundingSources = Array.from(new Map(sources.map(s => [s.uri, s])).values());
   }
 

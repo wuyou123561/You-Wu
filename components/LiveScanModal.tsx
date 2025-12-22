@@ -1,7 +1,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { GoogleGenAI, Modality } from '@google/genai';
-import { X, Mic, Radio, ShieldAlert, Activity, Waveform } from 'lucide-react';
+import { X, Mic, Radio, ShieldAlert, Activity } from 'lucide-react';
 
 interface LiveScanModalProps {
   onClose: () => void;
@@ -18,6 +18,7 @@ const LiveScanModal: React.FC<LiveScanModalProps> = ({ onClose }) => {
   const sessionRef = useRef<any>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const activeSources = useRef<Set<AudioBufferSourceNode>>(new Set());
 
   useEffect(() => {
     startSession();
@@ -26,6 +27,7 @@ const LiveScanModal: React.FC<LiveScanModalProps> = ({ onClose }) => {
 
   const startSession = async () => {
     try {
+      // Initialize right before connection
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
       
       const inputCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
@@ -67,8 +69,21 @@ const LiveScanModal: React.FC<LiveScanModalProps> = ({ onClose }) => {
               const source = ctx.createBufferSource();
               source.buffer = buffer;
               source.connect(ctx.destination);
+              
+              source.addEventListener('ended', () => {
+                activeSources.current.delete(source);
+              });
+
               source.start(nextStartTimeRef.current);
               nextStartTimeRef.current += buffer.duration;
+              activeSources.current.add(source);
+            }
+
+            // Handle Interruptions (Important for natural UX)
+            if (message.serverContent?.interrupted) {
+              activeSources.current.forEach(s => s.stop());
+              activeSources.current.clear();
+              nextStartTimeRef.current = 0;
             }
 
             if (message.serverContent?.outputTranscription) {
@@ -96,6 +111,8 @@ const LiveScanModal: React.FC<LiveScanModalProps> = ({ onClose }) => {
   const stopSession = () => {
     if (sessionRef.current) sessionRef.current.close();
     if (audioContextRef.current) audioContextRef.current.close();
+    activeSources.current.forEach(s => s.stop());
+    activeSources.current.clear();
     setIsAnalysing(false);
   };
 
@@ -221,7 +238,7 @@ const LiveScanModal: React.FC<LiveScanModalProps> = ({ onClose }) => {
       <div className="absolute bottom-12 flex items-center gap-6">
         <div className="flex flex-col items-center">
           <div className="w-1 h-12 bg-slate-800 rounded-full overflow-hidden">
-            <div className="w-full bg-indigo-500 animate-[shimmer_2s_infinite]" style={{ height: isConnected ? '100%' : '0%' }}></div>
+            <div className="w-full bg-indigo-500" style={{ height: isConnected ? '100%' : '0%' }}></div>
           </div>
           <span className="text-[8px] text-slate-500 font-black mt-2 uppercase tracking-widest">Signal Strength</span>
         </div>

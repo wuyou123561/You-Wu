@@ -15,7 +15,13 @@
         .mono {
             font-family: 'JetBrains Mono', monospace;
         }
+        /* 修复加载时的闪烁 */
+        [v-cloak] { display: none; }
     </style>
+    <script>
+        // 关键补丁：防止浏览器因为找不到 process 而白屏
+        window.process = window.process || { env: {} };
+    </script>
 <script type="importmap">
 {
   "imports": {
@@ -31,5 +37,7 @@
 </head>
 <body>
     <div id="root"></div>
+    <!-- 添加下面这一行，它是整个程序的“启动开关” -->
+    <script type="module" src="index.tsx"></script>
 </body>
 </html>

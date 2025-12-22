@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { analyzeNews } from './services/geminiService';
 import { AnalysisResult } from './types';
@@ -16,8 +15,10 @@ const App: React.FC = () => {
   const [isKeyMissing, setIsKeyMissing] = useState(false);
 
   useEffect(() => {
-    // 检查 API Key 是否存在
-    if (!process.env.API_KEY || process.env.API_KEY === 'undefined') {
+    // 检查 API Key 情况
+    const apiKey = process.env.API_KEY;
+    if (!apiKey || apiKey === '' || apiKey === 'undefined' || apiKey.includes('YOUR_API_KEY')) {
+      console.warn("⚠️ [SECURITY ALERT]: API_KEY is not configured.");
       setIsKeyMissing(true);
     }
   }, []);
@@ -43,33 +44,33 @@ const App: React.FC = () => {
     setError(null);
   };
 
-  // 如果没有配置 API Key，显示这个特工风格的错误页面
+  // 如果 Key 缺失，渲染提示界面
   if (isKeyMissing) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-center">
-        <div className="max-w-md w-full space-y-8 animate-in fade-in zoom-in duration-500">
+        <div className="max-w-md w-full space-y-8">
           <div className="relative mx-auto w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/50">
             <Lock className="text-red-500 w-10 h-10" />
             <div className="absolute inset-0 rounded-full border border-red-500 animate-ping opacity-20"></div>
           </div>
           <div className="space-y-4">
-            <h1 className="text-white text-2xl font-black italic tracking-tighter uppercase">Missing Intelligence Clearance</h1>
+            <h1 className="text-white text-2xl font-black italic tracking-tighter uppercase">Clearance Required</h1>
             <p className="text-slate-400 text-sm leading-relaxed font-mono">
-              [ERROR: API_KEY_NOT_FOUND]<br />
-              System access is currently restricted. Please configure the environment variables in the Vercel Dashboard.
+              [SYSTEM ERROR: API_KEY_MISSING]<br />
+              侦探，你尚未输入你的 Gemini 密钥。系统无法进行深度真相扫描。
             </p>
           </div>
-          <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 text-left">
-            <div className="flex items-center gap-2 mb-2">
+          <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 text-left">
+            <div className="flex items-center gap-2 mb-3">
               <Terminal className="w-4 h-4 text-indigo-500" />
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Deployment Guide</span>
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">修复指令</span>
             </div>
-            <ol className="text-[11px] text-slate-400 space-y-2 list-decimal list-inside">
-              <li>Open Vercel Dashboard</li>
-              <li>Settings > Environment Variables</li>
-              <li>Add <code className="text-indigo-400 font-bold">API_KEY</code></li>
-              <li>Redeploy the project</li>
-            </ol>
+            <p className="text-xs text-slate-400 leading-relaxed mb-4">
+              请在项目的环境变量设置中添加 <code className="text-indigo-400 font-bold">API_KEY</code>。
+            </p>
+            <div className="p-3 bg-black/50 rounded-lg font-mono text-[10px] text-emerald-500">
+              # 之后刷新页面即可进入终端
+            </div>
           </div>
         </div>
       </div>
@@ -120,7 +121,7 @@ const App: React.FC = () => {
                 <ShieldCheck className="w-10 h-10 opacity-20" />
               </div>
               <h3 className="text-lg font-medium text-slate-600">Awaiting Investigation</h3>
-              <p className="max-w-xs mt-2">Paste a news article or claim on the left to begin the Tri-Lens verification process.</p>
+              <p className="max-w-xs mt-2">在左侧输入新闻或主张，开启三维真相核查流程。</p>
             </div>
           )}
         </div>

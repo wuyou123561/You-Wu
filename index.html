@@ -9,6 +9,7 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #020617; margin: 0; padding: 0; }
         #root { min-height: 100vh; }
+        /* 启动时的加载提示，如果看到这个说明 HTML 正常加载了 */
         #root:empty::after {
             content: "INITIALIZING INTELLIGENCE TERMINAL...";
             position: absolute;
@@ -40,6 +41,7 @@
 </head>
 <body>
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <!-- Vite 会处理这个路径，确保它指向 index.tsx -->
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>

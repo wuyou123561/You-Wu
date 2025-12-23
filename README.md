@@ -1,80 +1,48 @@
+
 # 🕵️‍♂️ Digital Detective: The Tri-Lens Intelligence Suite
 
 > **"Verification is not a score; it's a binary of trust."**
-> A high-fidelity disinformation analysis terminal based on the "Sewage Theory" and the Red Flag System.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Framework: React](https://img.shields.io/badge/Framework-React-blue.svg)](https://reactjs.org/)
-[![AI: Gemini 3](https://img.shields.io/badge/AI-Gemini_Pro-indigo.svg)](https://ai.google.dev/)
+> 基于“污水理论”和红旗机制（Red Flag System）的高保真虚假信息分析终端。
 
 ---
 
-## 🔍 The Vision
+## 🚀 教师阅卷/快速部署指南 (Submission Guide)
 
-In an era of information warfare, "Fake News" is rarely 100% false. It is often constructed with "9 truths and 1 critical lie." Traditional scoring systems fail because they average out the toxicity. 
+本程序已针对 **Google Gemini API 免费层级** 进行优化。无需支付任何费用即可运行完整功能。
 
-**Digital Detective** implements the **Sewage Theory**: Just as a single drop of sewage ruins a bottle of fine wine, a single fabricated expert or a major logical fallacy invalidates an entire narrative. We don't calculate averages; we look for **Red Flags**.
+### 1. 获取免费 API Key
+1. 访问 [Google AI Studio](https://aistudio.google.com/)。
+2. 点击左侧的 **"Get API Key"**。
+3. 点击 **"Create API key in new project"**。
+4. **重要**：只要不绑定信用卡开启 "Pay-as-you-go"，即默认使用免费层级（Free of charge）。
 
----
+### 2. 环境配置
+在项目根目录创建 `.env` 文件（或在部署平台如 Vercel 的 Environment Variables 中配置）：
+```env
+API_KEY=您的_GEMINI_API_KEY
+```
 
-## 🛠 Methodology
-
-### 1. The Tri-Lens Protocol
-Every narrative is atomized into testable **Claims** and passed through three simultaneous filters:
-*   **Source Lens (Origin)**: Deep-dive into mentioned entities. Do they exist? Are they authoritative or fabricated?
-*   **Fact Lens (Evidence)**: Real-time verification against current web data using Google Search grounding.
-*   **Logic Lens (Structure)**: Identifying emotional manipulation and structural fallacies (e.g., Slippery Slope, Ad Hominem).
-
-### 2. S.C.A.N. Framework (AI Co-Pilot)
-A strategy for Human-AI collaboration:
-*   **S**ummarize Claims: Extract the core architecture of the narrative.
-*   **C**heck Fallacies: Use LLMs to find structural weaknesses in reasoning.
-*   **A**nalyze Sources: Cross-reference identities across the web.
-*   **N**eutralize Tone: Rewrite text to remove emotional bias and reveal the raw data.
+### 3. 免费版使用限制说明 (Important)
+- **频率限制 (Rate Limits)**：免费版 API 每分钟有调用次数限制（通常为 2-15 RPM）。若提示“侦探总部线路繁忙”，请等待 60 秒。
+- **搜索增强**：本程序强制开启了 `Google Search Grounding`。在免费层级下，该功能依然可用，但响应速度受 Google 搜索频率限制影响。
+- **隐私提醒**：Google 可能会使用免费层级的输入数据来优化模型（请勿输入敏感私人信息）。
 
 ---
 
-## ✨ Killer Features
+## 🔍 核心逻辑：三维核查协议 (Tri-Lens Protocol)
 
-*   **🕵️‍♂️ Dossier-Style UI**: Immersive "Intelligence Agency" interface where results are presented as classified evidence files.
-*   **🌐 Real-time Grounding**: Automatic **Source Trail** generation with clickable web references and favicon identification.
-*   **🎙️ Live Scan (Voice Intelligence)**: Real-time voice analysis. Speak a claim or read an article aloud, and the terminal will debunk it via audio in real-time using Gemini Live.
-*   **🚩 Red Flag Verdict**: Immediate visual "Detective Stamps" (AUTHENTIC vs FRAUDULENT) that reflect the Sewage Theory logic.
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-*   Node.js 18+
-*   Google Gemini API Key (with Google Search tool access enabled)
-
-### Installation
-1.  **Clone the Repository**
-    ```bash
-    git clone https://github.com/your-username/digital-detective.git
-    cd digital-detective
-    ```
-2.  **Install Dependencies**
-    ```bash
-    npm install
-    ```
-3.  **Configure Environment**
-    Create a `.env` file in the root directory:
-    ```env
-    API_KEY=your_gemini_api_key_here
-    ```
-4.  **Launch Terminal**
-    ```bash
-    npm run dev
-    ```
+我们不计算“平均分”，我们寻找“致命伤”：
+1. **信源镜 (Source)**：核查提及的专家/机构是否真实存在，而非捏造。
+2. **事实镜 (Fact)**：通过 Google 搜索进行实时在线比对，调取最新证据。
+3. **逻辑镜 (Logic)**：识别情绪化语言、因果倒置等逻辑谬误。
 
 ---
 
-## 🛡️ Disclaimer
-This project is an intelligence aid and research tool. While it uses state-of-the-art AI for verification, results should be cross-referenced with multiple authoritative outlets for sensitive or breaking news events.
+## ✨ 亮点功能
+- **实时语音侦听 (Live Scan)**：点击 Header 的 `LIVE SCAN`，可开启实时语音对话调查官。
+- **情报踪迹 (Intelligence Trail)**：自动提取 AI 搜索时的原始网页链接，确保结果可追溯。
+- **原子化拆解 (Atomization)**：将长篇报道拆解为独立的事实积木进行逐一审查。
 
 ---
-
-**Developed with ❤️ for Truth Seekers**
+**Developed for Truth Seekers**
 *"Stay skeptic, stay sharp."*

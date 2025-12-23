@@ -1,23 +1,22 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { AnalysisResult, SourceLink } from "../types";
 
 export const analyzeNews = async (content: string): Promise<AnalysisResult> => {
-  // Initialize AI right before the call to ensure it uses the current environment context
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: `Act as a professional disinformation analyst. Apply the 'Tri-Lens Protocol' to evaluate this news text: "${content}". 
+    contents: `Act as a professional disinformation analyst. Apply the 'Tri-Lens Protocol' to evaluate this news: "${content}". 
     
-    Instructions:
-    1. Atomization: Extract core factual claims.
-    2. Lens A (Source): Evaluate credibility. Use Google Search to verify mentioned entities.
-    3. Lens B (Fact): Evaluate verifiability against current web data.
-    4. Lens C (Logic): Evaluate reasoning and fallacies.
-    5. Red Flag System: If ANY lens has a major flaw, the verdict is RED. If there are minor warnings, YELLOW. Otherwise GREEN.
+    CRITICAL LOGIC: 
+    - This is NOT a scoring system. It is a RED FLAG system.
+    - If ANY lens has a 'Critical Failure' (e.g., fabricated source), the entire verdict is RED.
     
-    IMPORTANT: You MUST return valid JSON.`,
+    1. Source Lens: Verified/Anonymous/Fabricated.
+    2. Fact Lens: Solid Evidence/Vague/Contradictory.
+    3. Logic Lens: Logical/Emotional/Fallacious.
+    
+    Verdict must be GREEN, YELLOW, or RED.`,
     config: {
       tools: [{ googleSearch: {} }],
       responseMimeType: "application/json",
@@ -38,7 +37,7 @@ export const analyzeNews = async (content: string): Promise<AnalysisResult> => {
           sourceLens: {
             type: Type.OBJECT,
             properties: {
-              status: { type: Type.STRING, description: "One of: Verified, Anonymous, Fabricated" },
+              status: { type: Type.STRING },
               details: { type: Type.STRING },
               isRedFlag: { type: Type.BOOLEAN }
             }
@@ -46,7 +45,7 @@ export const analyzeNews = async (content: string): Promise<AnalysisResult> => {
           factLens: {
             type: Type.OBJECT,
             properties: {
-              status: { type: Type.STRING, description: "One of: Solid Evidence, Vague, Contradictory" },
+              status: { type: Type.STRING },
               details: { type: Type.STRING },
               isRedFlag: { type: Type.BOOLEAN }
             }
@@ -54,33 +53,29 @@ export const analyzeNews = async (content: string): Promise<AnalysisResult> => {
           logicLens: {
             type: Type.OBJECT,
             properties: {
-              status: { type: Type.STRING, description: "One of: Logical, Emotional, Fallacious" },
+              status: { type: Type.STRING },
               details: { type: Type.STRING },
               isRedFlag: { type: Type.BOOLEAN }
             }
           },
-          verdict: { type: Type.STRING, description: "One of: GREEN, YELLOW, RED" },
-          summary: { type: Type.STRING }
+          verdict: { type: Type.STRING },
+          summary: { type: Type.STRING },
+          redFlagExplanation: { type: Type.STRING, description: "The single biggest reason for the verdict." }
         },
-        required: ["claims", "sourceLens", "factLens", "logicLens", "verdict", "summary"]
+        required: ["claims", "sourceLens", "factLens", "logicLens", "verdict", "summary", "redFlagExplanation"]
       }
     }
   });
 
   const text = response.text || '{}';
-  const result = JSON.parse(text) as AnalysisResult;
+  const result = JSON.parse(text);
   
   const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
   if (groundingChunks) {
-    const sources: SourceLink[] = groundingChunks
+    result.groundingSources = groundingChunks
       .map((chunk: any) => chunk.web)
-      .filter((web: any) => web && web.uri && web.title)
-      .map((web: any) => ({
-        uri: web.uri,
-        title: web.title
-      }));
-    
-    result.groundingSources = Array.from(new Map(sources.map(s => [s.uri, s])).values());
+      .filter((web: any) => web && web.uri)
+      .map((web: any) => ({ uri: web.uri, title: web.title }));
   }
 
   return result;

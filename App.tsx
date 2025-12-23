@@ -1,27 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { analyzeNews } from './services/geminiService';
 import { AnalysisResult } from './types';
 import Header from './components/Header';
 import NewsInput from './components/NewsInput';
 import AnalysisDashboard from './components/AnalysisDashboard';
 import ProtocolGuide from './components/ProtocolGuide';
-import { AlertCircle, ShieldCheck, HelpCircle, Lock, Terminal } from 'lucide-react';
+import { AlertCircle, ShieldCheck, HelpCircle } from 'lucide-react';
 
 const App: React.FC = () => {
   const [content, setContent] = useState('');
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isKeyMissing, setIsKeyMissing] = useState(false);
-
-  useEffect(() => {
-    // 检查 API Key 情况
-    const apiKey = process.env.API_KEY;
-    if (!apiKey || apiKey === '' || apiKey === 'undefined' || apiKey.includes('YOUR_API_KEY')) {
-      console.warn("⚠️ [SECURITY ALERT]: API_KEY is not configured.");
-      setIsKeyMissing(true);
-    }
-  }, []);
 
   const handleAnalyze = async () => {
     if (!content.trim()) return;
@@ -31,7 +21,13 @@ const App: React.FC = () => {
       const result = await analyzeNews(content);
       setAnalysis(result);
     } catch (err: any) {
-      setError(err.message || 'Analysis failed. Please check your connection or try a shorter text.');
+      // 如果是因为没填 Key 导致的报错，这里会捕获并显示
+      const msg = err.message || '';
+      if (msg.includes('401') || msg.includes('API_KEY')) {
+        setError('Detective, your API_KEY is missing or invalid. Please configure it in environment settings.');
+      } else {
+        setError('Analysis failed. The truth is elusive right now. Please try again.');
+      }
       console.error(err);
     } finally {
       setLoading(false);
@@ -43,39 +39,6 @@ const App: React.FC = () => {
     setAnalysis(null);
     setError(null);
   };
-
-  // 如果 Key 缺失，渲染提示界面
-  if (isKeyMissing) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-center">
-        <div className="max-w-md w-full space-y-8">
-          <div className="relative mx-auto w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/50">
-            <Lock className="text-red-500 w-10 h-10" />
-            <div className="absolute inset-0 rounded-full border border-red-500 animate-ping opacity-20"></div>
-          </div>
-          <div className="space-y-4">
-            <h1 className="text-white text-2xl font-black italic tracking-tighter uppercase">Clearance Required</h1>
-            <p className="text-slate-400 text-sm leading-relaxed font-mono">
-              [SYSTEM ERROR: API_KEY_MISSING]<br />
-              侦探，你尚未输入你的 Gemini 密钥。系统无法进行深度真相扫描。
-            </p>
-          </div>
-          <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 text-left">
-            <div className="flex items-center gap-2 mb-3">
-              <Terminal className="w-4 h-4 text-indigo-500" />
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">修复指令</span>
-            </div>
-            <p className="text-xs text-slate-400 leading-relaxed mb-4">
-              请在项目的环境变量设置中添加 <code className="text-indigo-400 font-bold">API_KEY</code>。
-            </p>
-            <div className="p-3 bg-black/50 rounded-lg font-mono text-[10px] text-emerald-500">
-              # 之后刷新页面即可进入终端
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-20">
@@ -96,9 +59,9 @@ const App: React.FC = () => {
               onReset={reset}
             />
             {error && (
-              <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg flex items-start gap-2 text-sm border border-red-100">
-                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                <span>{error}</span>
+              <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-xl flex items-start gap-3 text-sm border border-red-100 animate-in shake duration-500">
+                <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
+                <span className="font-medium">{error}</span>
               </div>
             )}
           </section>
@@ -121,7 +84,7 @@ const App: React.FC = () => {
                 <ShieldCheck className="w-10 h-10 opacity-20" />
               </div>
               <h3 className="text-lg font-medium text-slate-600">Awaiting Investigation</h3>
-              <p className="max-w-xs mt-2">在左侧输入新闻或主张，开启三维真相核查流程。</p>
+              <p className="max-w-xs mt-2 italic">粘贴新闻到左侧，启动三维滤镜进行核查。</p>
             </div>
           )}
         </div>

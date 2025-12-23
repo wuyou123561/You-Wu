@@ -1,9 +1,13 @@
 
 import React, { useState } from 'react';
-import { Shield, Zap, Info, X, BookOpen, AlertOctagon, Terminal } from 'lucide-react';
+import { Shield, Zap, Info, X, BookOpen, AlertOctagon, Terminal, Key } from 'lucide-react';
 import LiveScanModal from './LiveScanModal';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  onTriggerAuth?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onTriggerAuth }) => {
   const [activeConcept, setActiveConcept] = useState<string | null>(null);
   const [isLiveScanOpen, setIsLiveScanOpen] = useState(false);
 
@@ -12,19 +16,19 @@ const Header: React.FC = () => {
       title: "The Tri-Lens Protocol",
       icon: <BookOpen className="w-6 h-6" />,
       color: "bg-indigo-600",
-      content: "A systematic approach to truth. We don't just 'fact-check'; we analyze the origin (Source), the evidence (Fact), and the structural integrity (Logic) of a narrative simultaneously."
+      content: "A systematic approach to truth. We analyze the origin (Source), the evidence (Fact), and the structural integrity (Logic) of a narrative simultaneously."
     },
     sewage: {
       title: "Sewage Theory",
       icon: <AlertOctagon className="w-6 h-6" />,
       color: "bg-red-600",
-      content: "Disinformation isn't a score. Like a single drop of sewage ruins a bottle of fine wine, a single fabricated expert or a major logical fallacy invalidates the entire news piece. This is our Red Flag System."
+      content: "Disinformation isn't a score. Like a single drop of sewage ruins a bottle of fine wine, a single fabricated expert or major logical fallacy invalidates the entire story."
     },
     scan: {
       title: "SCAN Framework",
       icon: <Terminal className="w-6 h-6" />,
       color: "bg-slate-900",
-      content: "Human-AI collaboration strategy: Summarize claims, Check fallacies, Analyze sources, and Neutralize emotional bias. Use AI as a power-tool for your own critical thinking."
+      content: "Summarize claims, Check fallacies, Analyze sources, and Neutralize emotional bias. Use AI as a power-tool for critical thinking."
     }
   };
 
@@ -44,10 +48,23 @@ const Header: React.FC = () => {
           </div>
         </div>
         
-        <div className="hidden lg:flex items-center gap-8 text-sm font-bold text-slate-500 uppercase tracking-tighter">
+        <div className="hidden lg:flex items-center gap-6 text-sm font-bold text-slate-500 uppercase tracking-tighter">
           <button onClick={() => setActiveConcept('protocol')} className="hover:text-indigo-600 transition-colors">The Protocol</button>
           <button onClick={() => setActiveConcept('sewage')} className="hover:text-red-600 transition-colors">Sewage Theory</button>
-          <button onClick={() => setActiveConcept('scan')} className="hover:text-slate-900 transition-colors">SCAN Framework</button>
+          
+          <div className="h-6 w-px bg-slate-200 mx-2"></div>
+
+          {onTriggerAuth && (
+            <button 
+              onClick={onTriggerAuth}
+              className="flex items-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-100 transition-all font-black"
+              title="Connect API Key"
+            >
+              <Key className="w-4 h-4" />
+              CONNECT API
+            </button>
+          )}
+
           <button 
             onClick={() => setIsLiveScanOpen(true)}
             className="bg-slate-900 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-700 transition-all active:scale-95 shadow-lg shadow-slate-200"
@@ -60,7 +77,6 @@ const Header: React.FC = () => {
 
       {isLiveScanOpen && <LiveScanModal onClose={() => setIsLiveScanOpen(false)} />}
 
-      {/* Concept Modal Overlay */}
       {activeConcept && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300">
           <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200">
@@ -81,7 +97,7 @@ const Header: React.FC = () => {
                 onClick={() => setActiveConcept(null)}
                 className="mt-8 w-full py-3 bg-slate-100 text-slate-900 font-black uppercase tracking-widest text-xs rounded-xl hover:bg-slate-200 transition-colors"
               >
-                Understood, Detective
+                Dismiss
               </button>
             </div>
           </div>
